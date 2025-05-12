@@ -1,33 +1,41 @@
-module.exports = (sequelize, DataTypes) => {
-    const BlogPost = sequelize.define('BlogPost', {
-      id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-      },
-      title: {
-        type: DataTypes.STRING,
-        allowNull: false
-      },
-      content: {
-        type: DataTypes.TEXT,
-        allowNull: false
-      },
-      countryName: {
-        type: DataTypes.STRING,
-        allowNull: false
-      },
-      dateOfVisit: {
-        type: DataTypes.DATE,
-        allowNull: false
-      },
-      images: {
-        type: DataTypes.JSON,
-        allowNull: true
+// models/BlogPost.js
+const { DataTypes } = require('sequelize');
+
+module.exports = (sequelize) => {
+  const BlogPost = sequelize.define('BlogPost', {
+    title: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        len: [5, 100]
       }
-    }, {
-      timestamps: true
-    });
-  
-    return BlogPost;
+    },
+    content: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+      validate: {
+        len: [50, 5000]
+      }
+    },
+    countryName: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    visitDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: false
+    },
+    images: {
+      type: DataTypes.JSON,
+      allowNull: true
+    }
+  });
+
+  BlogPost.associate = (models) => {
+    BlogPost.belongsTo(models.User, { foreignKey: 'userId' });
+    BlogPost.hasMany(models.Comment, { foreignKey: 'blogPostId' });
+    BlogPost.hasMany(models.Like, { foreignKey: 'blogPostId' });
   };
+
+  return BlogPost;
+};

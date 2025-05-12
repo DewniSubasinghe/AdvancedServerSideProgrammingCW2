@@ -1,8 +1,8 @@
-// models/index.js
 const { Sequelize } = require('sequelize');
 const path = require('path');
 const fs = require('fs');
 
+// Ensure db directory exists
 const dbPath = path.join(__dirname, '../db');
 if (!fs.existsSync(dbPath)) {
   fs.mkdirSync(dbPath);
@@ -11,7 +11,7 @@ if (!fs.existsSync(dbPath)) {
 const sequelize = new Sequelize({
   dialect: 'sqlite',
   storage: path.join(dbPath, 'database.sqlite'),
-  logging: console.log,
+  logging: false,
   define: {
     freezeTableName: true
   }
@@ -31,14 +31,21 @@ Comment.associate({ User, BlogPost });
 Like.associate({ User, BlogPost });
 Follow.associate({ User });
 
-// Test connection and sync with alter: true for schema updates
+// Test connection and sync
 sequelize.authenticate()
   .then(() => {
     console.log('Database connected');
-    return sequelize.sync({ alter: true }); // Changed from force: true to alter: true
+    // Use { force: true } only for development when you need to reset the database
+    return sequelize.sync({ alter: false });
   })
   .then(() => console.log('Database synced'))
-  .catch(err => console.error('Database error:', err));
+  .catch(err => {
+    console.error('Database error:', err);
+    // Try syncing without altering if the first attempt fails
+    return sequelize.sync();
+  })
+  .then(() => console.log('Database finally synced'))
+  .catch(err => console.error('Final database sync error:', err));
 
 module.exports = {
   sequelize,

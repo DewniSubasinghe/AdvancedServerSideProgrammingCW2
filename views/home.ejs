@@ -1,0 +1,93 @@
+<%- include('partials/header', { title: 'TravelTales - Home' }) %>
+
+<main class="container">
+  <section class="hero">
+    <h1>Welcome to TravelTales!</h1>
+    <p>Share your travel stories with the world</p>
+   
+    <% if (!isAuthenticated) { %>
+      <div class="auth-buttons">
+        <a href="/auth/register" class="btn btn-primary">Register</a>
+        <a href="/auth/login" class="btn btn-secondary">Login</a>
+      </div>
+    <% } else { %>
+      <div class="user-actions">
+        <p>Welcome back, <%= user.username %>!</p>
+        <a href="/users/<%= user.id %>" class="btn btn-primary">View Profile</a>
+        <a href="/blog/create" class="btn btn-success">Create Post</a>
+      </div>
+    <% } %>
+  </section>
+
+  <!-- Country Search Dropdown -->
+  <section class="country-search">
+    <h2>Explore Countries</h2>
+    <form action="/search" method="GET">
+      <select name="country" class="form-control">
+        <option value="">Select a country</option>
+        <% countries.forEach(country => { %>
+          <option value="<%= country %>"><%= country %></option>
+        <% }); %>
+      </select>
+      <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+  </section>
+
+  <!-- Recent Posts -->
+  <section class="recent-posts">
+    <h2>Recent Travel Tales</h2>
+    <% if (recentPosts && recentPosts.length > 0) { %>
+      <div class="posts-grid">
+        <% recentPosts.forEach(post => { %>
+          <div class="post-card">
+            <h3><a href="/blog/<%= post.id %>"><%= post.title %></a></h3>
+            <p class="post-meta">
+              <% if (post.User) { %>
+                By <a href="/users/<%= post.User.id %>"><%= post.User.username %></a> |
+              <% } %>
+              <%= post.countryName %> |
+              <%= new Date(post.createdAt).toLocaleDateString() %>
+            </p>
+            <p class="post-excerpt"><%= post.content.substring(0, 150) %>...</p>
+            <!-- <div class="post-stats">
+              <span><i class="fas fa-thumbs-up"></i> <%= post.likeCount %></span>
+              <span><i class="fas fa-comment"></i> <%= post.commentCount %></span>
+            </div> -->
+          </div>
+        <% }); %>
+      </div>
+    <% } else { %>
+      <p>No posts yet. Be the first to share your travel story!</p>
+    <% } %>
+  </section>
+
+  <!-- Popular Posts -->
+  <section class="popular-posts">
+    <h2>Popular Travel Tales</h2>
+    <% if (popularPosts && popularPosts.length > 0) { %>
+      <div class="posts-grid">
+        <% popularPosts.forEach(post => { %>
+          <div class="post-card">
+            <h3><a href="/blog/<%= post.id %>"><%= post.title %></a></h3>
+            <p class="post-meta">
+              <% if (post.User) { %>
+                By <a href="/users/<%= post.User.id %>"><%= post.User.username %></a> |
+              <% } %>
+              <%= post.countryName %> |
+              <%= new Date(post.createdAt).toLocaleDateString() %>
+            </p>
+            <p class="post-excerpt"><%= post.content.substring(0, 150) %>...</p>
+            <!-- <div class="post-stats">
+              <span><i class="fas fa-thumbs-up"></i> <%= post.likeCount %></span>
+              <span><i class="fas fa-comment"></i> <%= post.commentCount %></span>
+            </div> -->
+          </div>
+        <% }); %>
+      </div>
+    <% } else { %>
+      <p>No popular posts yet.</p>
+    <% } %>
+  </section>
+</main>
+
+<%- include('partials/footer') %>
