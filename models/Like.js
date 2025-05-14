@@ -1,12 +1,11 @@
-// models/Like.js
 const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
   const Like = sequelize.define('Like', {
-    isLike: {
-      type: DataTypes.BOOLEAN,
+    type: {
+      type: DataTypes.ENUM('like', 'dislike'),
       allowNull: false,
-      defaultValue: true
+      defaultValue: 'like'
     }
   });
 

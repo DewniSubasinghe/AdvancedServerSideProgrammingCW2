@@ -36,7 +36,7 @@ app.use(
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 60 minutes
-  max: 500, // limit each IP to 100 requests per windowMs
+  max: 500, // limiting each IP to 500 requests per windowMs
   message: 'Too many requests from this IP, please try again later',
   skip: (req) => {
     // Skip rate limiting for certain routes
@@ -72,7 +72,7 @@ app.use(session({
     dir: path.join(__dirname, 'db'),
     concurrentDB: true
   }),
-  secret: process.env.JWT_SECRET || 'your-secret-key',
+  secret: process.env.JWT_SECRET || 'secret-key',
   resave: false,
   saveUninitialized: false,
   cookie: {

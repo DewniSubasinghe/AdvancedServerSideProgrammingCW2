@@ -1,4 +1,3 @@
-// models/BlogPost.js
 const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
@@ -30,6 +29,26 @@ module.exports = (sequelize) => {
       allowNull: true
     }
   });
+
+  BlogPost.prototype.toJSON = function() {
+    const values = Object.assign({}, this.get());
+    
+    if (this.Likes) {
+      values.likeCount = this.Likes.filter(l => l.type === 'like').length;
+      values.dislikeCount = this.Likes.filter(l => l.type === 'dislike').length;
+    } else {
+      values.likeCount = 0;
+      values.dislikeCount = 0;
+    }
+    
+    if (this.Comments) {
+      values.commentCount = this.Comments.length;
+    } else {
+      values.commentCount = 0;
+    }
+    
+    return values;
+  };
 
   BlogPost.associate = (models) => {
     BlogPost.belongsTo(models.User, { foreignKey: 'userId' });

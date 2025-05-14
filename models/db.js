@@ -35,7 +35,7 @@ Follow.associate({ User });
 sequelize.authenticate()
   .then(() => {
     console.log('Database connected');
-    // Use { force: true } only for development when you need to reset the database
+    // Use { force: true } only for development when need to reset the database
     return sequelize.sync({ alter: false });
   })
   .then(() => console.log('Database synced'))

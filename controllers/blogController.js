@@ -2,11 +2,29 @@ const { BlogPost, User, Like, Comment } = require('../models');
 const { getCountryData } = require('../utils/helpers');
 const axios = require('axios');
 
+// Helper function to get like/dislike counts
+async function getLikeDislikeCounts(postId) {
+  const likes = await Like.count({
+    where: {
+      blogPostId: postId,
+      type: 'like'
+    }
+  });
+
+  const dislikes = await Like.count({
+    where: {
+      blogPostId: postId,
+      type: 'dislike'
+    }
+  });
+
+  return { likeCount: likes, dislikeCount: dislikes };
+}
+
 module.exports = {
     getPosts: async (req, res) => {
         try {
             const posts = await BlogPost.findAll({
-                // In the getPosts function, update the include section:
                 include: [
                   {
                     model: User,
@@ -15,7 +33,7 @@ module.exports = {
                   },
                   {
                     model: Like,
-                    attributes: ['id']
+                    attributes: ['id', 'type']
                   },
                   {
                     model: Comment,
@@ -27,10 +45,14 @@ module.exports = {
 
             const postsWithCounts = posts.map(post => {
                 const postJson = post.get({ plain: true });
+                const likes = postJson.Likes ? postJson.Likes.filter(l => l.type === 'like').length : 0;
+                const dislikes = postJson.Likes ? postJson.Likes.filter(l => l.type === 'dislike').length : 0;
+                
                 return {
                     ...postJson,
                     User: postJson.User || { id: 0, username: 'Unknown' },
-                    likeCount: postJson.Likes ? postJson.Likes.length : 0,
+                    likeCount: likes,
+                    dislikeCount: dislikes,
                     commentCount: postJson.Comments ? postJson.Comments.length : 0
                 };
             });
@@ -132,17 +154,26 @@ module.exports = {
                 region: 'Unknown'
             };
 
-            const userLiked = req.user ? 
-                postJson.Likes.some(like => like.userId === req.user.id) : 
+            const userLiked = req.user ?
+                postJson.Likes.some(like => like.userId === req.user.id && like.type === 'like') :
                 false;
+
+            const userDisliked = req.user ?
+                postJson.Likes.some(like => like.userId === req.user.id && like.type === 'dislike') :
+                false;
+
+            const likeCount = postJson.Likes ? postJson.Likes.filter(l => l.type === 'like').length : 0;
+            const dislikeCount = postJson.Likes ? postJson.Likes.filter(l => l.type === 'dislike').length : 0;
 
             res.render('blog/show', {
                 title: post.title,
                 post: {
                     ...postJson,
-                    likeCount: postJson.Likes ? postJson.Likes.length : 0,
+                    likeCount,
+                    dislikeCount,
                     commentCount: postJson.Comments ? postJson.Comments.length : 0,
-                    userLiked
+                    userLiked,
+                    userDisliked
                 },
                 countryData,
                 user: req.user
@@ -215,7 +246,7 @@ module.exports = {
             res.redirect(`/blog/${post.id}`);
         } catch (error) {
             console.error('Error creating post:', error);
-            
+           
             try {
                 const response = await axios.get('https://restcountries.com/v3.1/all');
                 const countries = response.data.map(c => ({
@@ -290,7 +321,7 @@ module.exports = {
         }
 
         await post.destroy();
-        res.redirect('/'); // Redirect to home page after deletion
+        res.redirect('/');
       } catch (error) {
         console.error('Error deleting post:', error);
         res.status(500).render('error', {
@@ -299,7 +330,6 @@ module.exports = {
         });
       }
     },
-
 
     likePost: async (req, res) => {
       try {
@@ -313,32 +343,70 @@ module.exports = {
             blogPostId: req.params.id
           },
           defaults: {
-            isLike: true
+            type: 'like'
           }
         });
 
         if (!created) {
-          await like.update({ isLike: !like.isLike });
+          if (like.type === 'like') {
+            await like.destroy();
+          } else {
+            await like.update({ type: 'like' });
+          }
         }
 
-        const likeCount = await Like.count({
-          where: {
-            blogPostId: req.params.id,
-            isLike: true
-          }
-        });
+        const counts = await getLikeDislikeCounts(req.params.id);
 
-        // Return minimal data needed for frontend update
         res.json({
           success: true,
-          isLike: like.isLike,
-          likeCount
+          action: created ? 'liked' : like.type === 'like' ? 'removed' : 'liked',
+          ...counts
         });
       } catch (error) {
         console.error('Error liking post:', error);
         res.status(500).json({
           success: false,
           error: 'Failed to update like'
+        });
+      }
+    },
+
+    dislikePost: async (req, res) => {
+      try {
+        if (!req.user) {
+          return res.status(401).json({ success: false, error: 'Not authenticated' });
+        }
+
+        const [like, created] = await Like.findOrCreate({
+          where: {
+            userId: req.user.id,
+            blogPostId: req.params.id
+          },
+          defaults: {
+            type: 'dislike'
+          }
+        });
+
+        if (!created) {
+          if (like.type === 'dislike') {
+            await like.destroy();
+          } else {
+            await like.update({ type: 'dislike' });
+          }
+        }
+
+        const counts = await getLikeDislikeCounts(req.params.id);
+
+        res.json({
+          success: true,
+          action: created ? 'disliked' : like.type === 'dislike' ? 'removed' : 'disliked',
+          ...counts
+        });
+      } catch (error) {
+        console.error('Error disliking post:', error);
+        res.status(500).json({
+          success: false,
+          error: 'Failed to update dislike'
         });
       }
     },

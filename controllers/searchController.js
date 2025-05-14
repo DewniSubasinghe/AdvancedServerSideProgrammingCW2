@@ -20,7 +20,12 @@ module.exports = {
       }
 
       if (author) {
-        include[0].where = { username: author };
+        include[0].where = { 
+          [Op.or]: [
+            { username: { [Op.like]: `%${author}%` } },
+            { email: { [Op.like]: `%${author}%` } }
+          ]
+        };
       }
 
       if (query) {
@@ -39,22 +44,34 @@ module.exports = {
 
       const posts = await BlogPost.findAll({
         where,
-        include,
+        include: [
+          ...include,
+          {
+            model: Like,
+            attributes: ['id', 'type']
+          },
+          {
+            model: Comment,
+            attributes: ['id']
+          }
+        ],
         order
       });
 
-      // Process posts to ensure User is never null
       const processedPosts = posts.map(post => {
         const postJson = post.get({ plain: true });
+        const likes = postJson.Likes ? postJson.Likes.filter(l => l.type === 'like').length : 0;
+        const dislikes = postJson.Likes ? postJson.Likes.filter(l => l.type === 'dislike').length : 0;
+        
         return {
           ...postJson,
           User: postJson.User || { id: 0, username: 'Unknown' },
-          likeCount: postJson.Likes ? postJson.Likes.length : 0,
+          likeCount: likes,
+          dislikeCount: dislikes,
           commentCount: postJson.Comments ? postJson.Comments.length : 0
         };
       });
 
-      // Get all countries for dropdown
       let countries = [];
       let countryData = null;
      

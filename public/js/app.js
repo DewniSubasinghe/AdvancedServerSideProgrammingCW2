@@ -35,7 +35,7 @@ app.use(session({
     dir: path.join(__dirname, 'db'),
     concurrentDB: true
   }),
-  secret: process.env.JWT_SECRET || 'your-secret-key',
+  secret: process.env.JWT_SECRET || 'secret-key',
   resave: false,
   saveUninitialized: false,
   cookie: {

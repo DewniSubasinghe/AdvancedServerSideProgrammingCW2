@@ -1,4 +1,5 @@
 <%- include('./partials/header', { title: 'Search Travel Tales' }) %>
+
 <section class="search-results">
   <div class="container">
     <h1>Search Results</h1>
@@ -32,6 +33,7 @@
             <p class="excerpt"><%= post.content.substring(0, 150) %>...</p>
             <div class="post-stats">
               <span><i class="fas fa-thumbs-up"></i> <%= post.likeCount %></span>
+              <span><i class="fas fa-thumbs-down"></i> <%= post.dislikeCount %></span>
               <span><i class="fas fa-comment"></i> <%= post.commentCount %></span>
             </div>
           </article>
@@ -51,4 +53,5 @@
     <% } %>
   </div>
 </section>
+
 <%- include('./partials/footer') %>

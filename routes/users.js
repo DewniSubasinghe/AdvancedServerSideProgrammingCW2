@@ -4,7 +4,7 @@ const { User, BlogPost, Like, Comment, Follow } = require('../models');
 const { ensureAuthenticated } = require('../middleware/auth');
 
 // Profile route
-router.get('/:id', async (req, res) => {
+router.get('/:id', ensureAuthenticated, async (req, res) => {
   try {
     const userId = req.params.id;
     const user = await User.findByPk(userId, {
@@ -38,6 +38,7 @@ router.get('/:id', async (req, res) => {
     userJson.BlogPosts = userJson.BlogPosts ? userJson.BlogPosts.map(post => ({
       ...post,
       likeCount: post.Likes ? post.Likes.length : 0,
+      dislikeCount: post.Likes ? post.Likes.filter(l => l.type === 'dislike').length : 0,
       commentCount: post.Comments ? post.Comments.length : 0
     })) : [];
 

@@ -14,7 +14,7 @@ const getHomePage = async (req, res) => {
         },
         {
           model: Like,
-          attributes: ['id']
+          attributes: ['id', 'type']
         },
         {
           model: Comment,
@@ -35,7 +35,7 @@ const getHomePage = async (req, res) => {
         },
         {
           model: Like,
-          attributes: ['id']
+          attributes: ['id', 'type']
         },
         {
           model: Comment,
@@ -48,9 +48,12 @@ const getHomePage = async (req, res) => {
     // Add counts to posts
     const postsWithCounts = recentPosts.map(post => {
       const postJson = post.toJSON();
+      const likes = postJson.Likes ? postJson.Likes.filter(l => l.type === 'like').length : 0;
+      const dislikes = postJson.Likes ? postJson.Likes.filter(l => l.type === 'dislike').length : 0;
       return {
         ...postJson,
-        likeCount: postJson.Likes ? postJson.Likes.length : 0,
+        likeCount: likes,
+        dislikeCount: dislikes,
         commentCount: postJson.Comments ? postJson.Comments.length : 0,
         User: postJson.User || { id: 0, username: 'Unknown' }
       };
@@ -58,9 +61,12 @@ const getHomePage = async (req, res) => {
 
     const popularWithCounts = popularPosts.map(post => {
       const postJson = post.toJSON();
+      const likes = postJson.Likes ? postJson.Likes.filter(l => l.type === 'like').length : 0;
+      const dislikes = postJson.Likes ? postJson.Likes.filter(l => l.type === 'dislike').length : 0;
       return {
         ...postJson,
-        likeCount: postJson.Likes ? postJson.Likes.length : 0,
+        likeCount: likes,
+        dislikeCount: dislikes,
         commentCount: postJson.Comments ? postJson.Comments.length : 0,
         User: postJson.User || { id: 0, username: 'Unknown' }
       };
