@@ -74,11 +74,6 @@
               <%= new Date(post.createdAt).toLocaleDateString() %>
             </p>
             <p class="post-excerpt"><%= post.content.substring(0, 150) %>...</p>
-            <div class="post-stats">
-              <span><i class="fas fa-thumbs-up"></i> <%= post.likeCount || 0 %></span>
-              <span><i class="fas fa-thumbs-down"></i> <%= post.dislikeCount || 0 %></span>
-              <span><i class="fas fa-comment"></i> <%= post.commentCount || 0 %></span>
-            </div>
           </div>
         <% }); %>
       </div>
@@ -105,11 +100,6 @@
               <%= new Date(post.createdAt).toLocaleDateString() %>
             </p>
             <p class="post-excerpt"><%= post.content.substring(0, 150) %>...</p>
-            <div class="post-stats">
-              <span><i class="fas fa-thumbs-up"></i> <%= post.likeCount || 0 %></span>
-              <span><i class="fas fa-thumbs-down"></i> <%= post.dislikeCount || 0 %></span>
-              <span><i class="fas fa-comment"></i> <%= post.commentCount || 0 %></span>
-            </div>
           </div>
         <% }); %>
       </div>
