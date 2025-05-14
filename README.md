@@ -12,7 +12,7 @@ AdvancedServerSideProgrammingCW2 by Dewni Subasinghe
 
 ![image](https://github.com/user-attachments/assets/fc541003-6eac-49a9-bfb1-6cfda04d0ace)
 
-![image](https://github.com/user-attachments/assets/248d8089-bfef-4469-a896-792187bf9920)
+![image](https://github.com/user-attachments/assets/49d8c638-2bb3-4824-a6da-148b8b0c1d18)
 
 
 TravelTales: A Global Journey Through Stories
